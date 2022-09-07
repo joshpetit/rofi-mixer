@@ -2,7 +2,6 @@
 
 import os
 import re
-import sys
 import argparse
 
 VOLUME_DELTA = 5
