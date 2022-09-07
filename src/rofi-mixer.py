@@ -103,8 +103,12 @@ def main():
                 prefix = "*"
             else:
                 prefix = ""
+            if len(last_device_match) < 40:
+                dev_title = last_device_match
+            else:
+                dev_title =  last_device_match[0:39] + '...'
             print(
-                f"{prefix} {last_device_match if len(last_device_match) < 40 else last_device_match[0:39] + '...'} {last_volume_match} {last_mute_match}{rofi_info}{mute_icon}".strip()
+                f"{prefix} {dev_title} {last_volume_match} {last_mute_match}{rofi_info}{mute_icon}".strip()
             )
 
 

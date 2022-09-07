@@ -3,8 +3,6 @@
 BASEDIR=$(dirname "$0")
 
 rofi -theme-str 'window { width: 840; }' \
-#-kb-custom-15 "period" \
-#-kb-custom-16 "comma" \
 -kb-custom-17 "Alt+m" \
 -kb-custom-18 "minus,underscore" \
 -kb-custom-19 "plus,equal" \
