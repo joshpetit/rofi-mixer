@@ -4,65 +4,79 @@ import os
 import re
 import sys
 import argparse
-VOLUME_DELTA=5
-ROFI_RETV=os.getenv("ROFI_RETV")
-ROFI_INFO=os.getenv("ROFI_INFO")
-parser = argparse.ArgumentParser(description='Rofi sound mixer')
-parser.add_argument('--type', type=str, nargs='?', const="sink", default="sink", help="'sink' for speakers 'source' for microphones" )
-parser.add_argument('pos_arg', type=str, nargs='?')
-args = parser.parse_args();
+
+VOLUME_DELTA = 5
+ROFI_RETV = os.getenv("ROFI_RETV")
+ROFI_INFO = os.getenv("ROFI_INFO")
+parser = argparse.ArgumentParser(description="Rofi sound mixer")
+parser.add_argument(
+    "--type",
+    type=str,
+    nargs="?",
+    const="sink",
+    default="sink",
+    help="'sink' for speakers 'source' for microphones",
+)
+parser.add_argument("pos_arg", type=str, nargs="?")
+args = parser.parse_args()
 first_arg = args.pos_arg
-dev_type=args.type
+dev_type = args.type
 
 if first_arg == "quit":
     quit()
 
-use_hot_keys="\x00use-hot-keys\x1ftrue\n"
-keep_selection="\x00keep-selection\x1ftrue\n"
-prompt="\x00prompt\x1fSelect Output\n"
+use_hot_keys = "\x00use-hot-keys\x1ftrue\n"
+keep_selection = "\x00keep-selection\x1ftrue\n"
+prompt = "\x00prompt\x1fSelect Output\n"
 
 print(f"{use_hot_keys}{prompt}{keep_selection}")
 
+
 def get_device_from_desc(description):
-    res = os.popen(f'pactl list {dev_type}s| grep -C2 "Description: {description}"|grep Name|cut -d: -f2|xargs');
+    res = os.popen(
+        f'pactl list {dev_type}s| grep -C2 "Description: {description}"|grep Name|cut -d: -f2|xargs'
+    )
     return res.read().strip()
+
 
 def get_desc_from_device(device):
-    res = os.popen(f'pactl list {dev_type}s| grep -C2 {device} | grep -e "Description" | cut -d: -f2')
+    res = os.popen(
+        f'pactl list {dev_type}s| grep -C2 {device} | grep -e "Description" | cut -d: -f2'
+    )
     return res.read().strip()
 
+
 if ROFI_RETV == "1":
-    desc=ROFI_INFO
-    device=get_device_from_desc(desc)
+    desc = ROFI_INFO
+    device = get_device_from_desc(desc)
     os.system(f'pactl set-default-{dev_type} "{device}"')
 
 if ROFI_RETV == "28":
-    desc=ROFI_INFO
-    device=get_device_from_desc(desc)
+    desc = ROFI_INFO
+    device = get_device_from_desc(desc)
     os.system(f'pactl set-{dev_type}-volume "{device}" +{VOLUME_DELTA}%')
 
 if ROFI_RETV == "27":
-    desc=ROFI_INFO
-    device=get_device_from_desc(desc)
+    desc = ROFI_INFO
+    device = get_device_from_desc(desc)
     os.system(f'pactl set-{dev_type}-volume "{device}" -{VOLUME_DELTA}%')
 
 if ROFI_RETV == "26":
-    desc=ROFI_INFO
-    device=get_device_from_desc(desc)
+    desc = ROFI_INFO
+    device = get_device_from_desc(desc)
     os.system(f'pactl set-{dev_type}-mute "{device}" toggle')
-
 
 
 def main():
     res = os.popen(f"pactl list {dev_type}s")
     lines = res.read()
     res = os.popen(f"pactl get-default-{dev_type}")
-    def_device = res.read().strip();
+    def_device = res.read().strip()
     last_device_match = ""
     last_volume_match = ""
     last_mute_match = ""
     prefix = ""
-    mute_icon=""
+    mute_icon = ""
     rofi_info = ""
     description_re = re.compile(r"\s*Description: ")
     volume_re = re.compile(r"\s*Volume: ")
@@ -74,9 +88,9 @@ def main():
             muted = line.split("Mute: ")
             if muted[1] == "yes":
                 last_mute_match = "(Muted)"
-                mute_icon='\x1ficon\x1f<span color="white">ﱝ</span>'
+                mute_icon = '\x1ficon\x1f<span color="white">ﱝ</span>'
             else:
-                mute_icon=""
+                mute_icon = ""
                 last_mute_match = ""
         # This is the last thing to be matched
         elif volume_re.match(line):
@@ -84,11 +98,14 @@ def main():
             left_volume = f"Left: {volumes[1].strip()}"
             right_volume = f"Right: {volumes[3].strip()}" if len(volumes) > 3 else ""
             last_volume_match = f"{left_volume} {right_volume}"
-            rofi_info=f"\x00info\x1f{last_device_match}"
+            rofi_info = f"\x00info\x1f{last_device_match}"
             if def_device == get_device_from_desc(last_device_match):
                 prefix = "*"
             else:
                 prefix = ""
-            print(f"{prefix} {last_device_match if len(last_device_match) < 40 else last_device_match[0:39] + '...'} {last_volume_match} {last_mute_match}{rofi_info}{mute_icon}".strip())
+            print(
+                f"{prefix} {last_device_match if len(last_device_match) < 40 else last_device_match[0:39] + '...'} {last_volume_match} {last_mute_match}{rofi_info}{mute_icon}".strip()
+            )
+
 
 main()
