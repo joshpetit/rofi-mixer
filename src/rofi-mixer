@@ -3,9 +3,14 @@
 BASEDIR=$(dirname "$0")
 
 rofi -theme-str 'window { width: 840; }' \
+-kb-custom-12 "Shift+period" \
+-kb-custom-13 "Shift+comma" \
+-kb-custom-14 "period" \
+-kb-custom-15 "comma" \
+-kb-custom-16 "equal" \
 -kb-custom-17 "Alt+m" \
 -kb-custom-18 "minus,underscore" \
--kb-custom-19 "plus,equal" \
+-kb-custom-19 "plus" \
 -show rofi-sink-mixer \
 -modi "rofi-sink-mixer:$BASEDIR/rofi-mixer.py --type sink,rofi-source-mixer:$BASEDIR/rofi-mixer.py --type source"
 

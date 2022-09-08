@@ -5,7 +5,12 @@ import re
 import argparse
 
 VOLUME_DELTA = 5
-ROFI_RETV = os.getenv("ROFI_RETV")
+res = os.getenv("ROFI_RETV")
+if res is not None:
+    ROFI_RETV = int(res)
+else:
+    ROFI_RETV = -1
+
 ROFI_INFO = os.getenv("ROFI_INFO")
 parser = argparse.ArgumentParser(description="Rofi sound mixer")
 parser.add_argument(
@@ -45,25 +50,33 @@ def get_desc_from_device(device):
     return res.read().strip()
 
 
-if ROFI_RETV == "1":
+if ROFI_RETV == 1:
     desc = ROFI_INFO
     device = get_device_from_desc(desc)
     os.system(f'pactl set-default-{dev_type} "{device}"')
 
-if ROFI_RETV == "28":
+if ROFI_RETV == 28:
     desc = ROFI_INFO
     device = get_device_from_desc(desc)
     os.system(f'pactl set-{dev_type}-volume "{device}" +{VOLUME_DELTA}%')
 
-if ROFI_RETV == "27":
+if ROFI_RETV == 27:
     desc = ROFI_INFO
     device = get_device_from_desc(desc)
     os.system(f'pactl set-{dev_type}-volume "{device}" -{VOLUME_DELTA}%')
 
-if ROFI_RETV == "26":
+if ROFI_RETV == 26:
     desc = ROFI_INFO
     device = get_device_from_desc(desc)
     os.system(f'pactl set-{dev_type}-mute "{device}" toggle')
+
+if ROFI_RETV == 25:
+    device = get_device_from_desc(ROFI_INFO)
+    res = os.popen(f'pactl get-sink-volume {device}')
+    line = res.read()
+    volumes = line.split("/")
+    left_volume = f"{volumes[1].strip()}"
+    os.system(f'pactl set-sink-volume {device} {left_volume} {left_volume}')
 
 
 def main():
