@@ -31,7 +31,7 @@ if first_arg == "quit":
 
 use_hot_keys = "\x00use-hot-keys\x1ftrue\n"
 keep_selection = "\x00keep-selection\x1ftrue\n"
-prompt = "\x00prompt\x1fSelect Output\n"
+prompt = f"\x00prompt\x1fSelect {'Speaker' if dev_type == 'sink' else 'Microphone'}\n"
 
 print(f"{use_hot_keys}{prompt}{keep_selection}")
 
