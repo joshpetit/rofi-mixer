@@ -72,11 +72,11 @@ if ROFI_RETV == 26:
 
 if ROFI_RETV == 25:
     device = get_device_from_desc(ROFI_INFO)
-    res = os.popen(f'pactl get-sink-volume {device}')
+    res = os.popen(f"pactl get-sink-volume {device}")
     line = res.read()
     volumes = line.split("/")
     left_volume = f"{volumes[1].strip()}"
-    os.system(f'pactl set-sink-volume {device} {left_volume} {left_volume}')
+    os.system(f"pactl set-sink-volume {device} {left_volume} {left_volume}")
 
 
 def main():
@@ -118,7 +118,7 @@ def main():
             if len(last_device_match) < 40:
                 dev_title = last_device_match
             else:
-                dev_title =  last_device_match[0:39] + '...'
+                dev_title = last_device_match[0:39] + "..."
             print(
                 f"{prefix} {dev_title} {last_volume_match} {last_mute_match}{rofi_info}{mute_icon}".strip()
             )
