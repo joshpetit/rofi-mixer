@@ -5,6 +5,28 @@ pulse audio (or pipewire with the pulse audio capabilities).
 
 ## Usage
 
-Run rofi-mixer
+1. Run rofi-mixer
+
+```
+rofi-mixer
+```
+
+2. Succeed  at life
+
+## Shortcuts
+
+|--------------+-----------------------|
+| Shortcut     | Action                |
+| '+', '='     | Increase volume by 5  |
+| '-', '_'     | Decrease volume by 5  |
+| 'Alt+m'      | Mute device           |
+| 'Ctrl+equal' | Equalize L+R Speakers |
+|--------------+-----------------------|
 
 ## Installation
+
+```sh
+yay -S rofi-mixer
+```
+
+Otherwise you can clone the repo and then run the `rofi-mixer` file
