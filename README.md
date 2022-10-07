@@ -15,13 +15,12 @@ rofi-mixer
 
 ## Shortcuts
 
-|--------------+-----------------------|
 | Shortcut     | Action                |
+| ------------ | --------------------- |
 | '+', '='     | Increase volume by 5  |
 | '-', '_'     | Decrease volume by 5  |
 | 'Alt+m'      | Mute device           |
 | 'Ctrl+equal' | Equalize L+R Speakers |
-|--------------+-----------------------|
 
 ## Installation
 
