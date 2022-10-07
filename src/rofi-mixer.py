@@ -123,5 +123,5 @@ def main():
                 f"{prefix} {dev_title} {last_volume_match} {last_mute_match}{rofi_info}{mute_icon}".strip()
             )
 
-
-main()
+if __name__ == '__main__':
+  main()
