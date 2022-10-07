@@ -25,7 +25,7 @@ rofi-mixer
 ## Installation
 
 ```sh
-yay -S rofi-mixer
+yay -S rofi-mixer-git
 ```
 
 Otherwise you can clone the repo and then run the `rofi-mixer` file
