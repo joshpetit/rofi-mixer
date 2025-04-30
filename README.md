@@ -1,6 +1,6 @@
 # Rofi-mixer
 
-Rofi-mixer allows you to manage your speakers and microphones on systems with
+Rofi-mixer allows you to manage your speakers, apps and microphones on systems with
 pulse audio (or pipewire with the pulse audio capabilities).
 
 ![rice-f009082](https://user-images.githubusercontent.com/59021155/195224188-cf75816c-d147-423b-b441-bf7a866fc4c6.png)
@@ -16,7 +16,7 @@ rofi-mixer
 
 2. Use it
 
-There are two available modes, output (speakers and the default) and input
+There are three available modes, output (speakers and the default), applications and input
 (microphones, you have to switch to). Shift+left or Shift+right are the default
 keybindings for changing modes in rofi.
 
