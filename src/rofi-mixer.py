@@ -30,13 +30,14 @@ if first_arg == "quit":
 
 use_hot_keys = "\x00use-hot-keys\x1ftrue\n"
 keep_selection = "\x00keep-selection\x1ftrue\n"
+enable_markup = "\x00markup-rows\x1ftrue\n"
 
 if dev_type == "app":
     prompt = "\x00prompt\x1fSelect Application\n"
 else:
     prompt = f"\x00prompt\x1fSelect {'Speaker' if dev_type == 'sink' else 'Microphone'}\n"
 
-print(f"{use_hot_keys}{prompt}{keep_selection}")
+print(f"{use_hot_keys}{prompt}{keep_selection}{enable_markup}")
 
 def get_device_from_desc(description):
     res = os.popen(
@@ -112,17 +113,23 @@ def create_volume_bar(volume_percent):
         volume_value = 0
     
 
-    volume_value = max(0, min(100, volume_value))
+    volume_value = max(0, volume_value)
     
 
     bar_length = 10
-    filled_segments = int(round(volume_value / 100 * bar_length))
     
+    
+    if volume_value > 100:
+        overflowed_segments = int(round(min(100, volume_value-100) / 100 * bar_length))
+        filled_segments = bar_length - overflowed_segments
+    else:
+        overflowed_segments = 0
+        filled_segments = int(round(min(100, volume_value) / 100 * bar_length))
 
     filled = "▓"  
     empty = "░"   
     
-    bar = filled * filled_segments + empty * (bar_length - filled_segments)
+    bar = "<span foreground='red'>" + filled * overflowed_segments + "</span>" + filled * filled_segments + empty * (bar_length - filled_segments - overflowed_segments)
     
     return f"[{bar}] {volume_value}%"
 
