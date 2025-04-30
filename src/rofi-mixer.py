@@ -101,6 +101,31 @@ if ROFI_RETV == 25:
         left_volume = f"{volumes[1].strip()}"
         os.system(f"pactl set-sink-volume {device} {left_volume} {left_volume}")
 
+def create_volume_bar(volume_percent):
+    """Create a visual representation of volume level using Unicode block characters."""
+    try:
+        if "%" in volume_percent:
+            volume_value = int(volume_percent.strip().rstrip("%"))
+        else:
+            volume_value = int(volume_percent.strip())
+    except (ValueError, TypeError):
+        volume_value = 0
+    
+
+    volume_value = max(0, min(100, volume_value))
+    
+
+    bar_length = 10
+    filled_segments = int(round(volume_value / 100 * bar_length))
+    
+
+    filled = "▓"  
+    empty = "░"   
+    
+    bar = filled * filled_segments + empty * (bar_length - filled_segments)
+    
+    return f"[{bar}] {volume_value}%"
+
 def list_sinks_sources():
     res = os.popen(f"pactl list {dev_type}s")
     lines = res.read()
@@ -109,6 +134,7 @@ def list_sinks_sources():
     
     last_device_match = ""
     last_volume_match = ""
+    last_volume_percent = ""
     last_mute_match = ""
     prefix = ""
     mute_icon = ""
@@ -129,12 +155,15 @@ def list_sinks_sources():
             else:
                 mute_icon = ""
                 last_mute_match = ""
-        # This is the last thing to be matched
+
         elif volume_re.match(line):
             volumes = line.split("/")
-            left_volume = f"Left: {volumes[1].strip()}"
-            right_volume = f"Right: {volumes[3].strip()}" if len(volumes) > 3 else ""
-            last_volume_match = f"{left_volume} {right_volume}"
+            volume_percent_match = re.search(r"(\d+)%", volumes[1])
+            if volume_percent_match:
+                last_volume_percent = volume_percent_match.group(1)
+            
+            volume_bar = create_volume_bar(last_volume_percent)
+            last_volume_match = volume_bar
             rofi_info = f"\x00info\x1f{last_device_match}"
             
             if def_device == get_device_from_desc(last_device_match):
@@ -157,10 +186,10 @@ def list_applications():
     
     app_name = ""
     app_volume = ""
+    app_volume_percent = ""
     app_muted = ""
     sink_input = ""
     mute_icon = ""
-    
     
     sink_input_re = re.compile(r"Sink Input #(\d+)")
     volume_re = re.compile(r"\s*Volume: ")
@@ -173,23 +202,30 @@ def list_applications():
             if app_name and sink_input:
                 rofi_info = f"\x00info\x1f{app_name}||{sink_input}"
                 
+                volume_bar = create_volume_bar(app_volume_percent)
+                
                 if len(app_name) < 40:
                     app_title = app_name
                 else:
                     app_title = app_name[0:39] + "..."
                     
-                print(f"{app_title} {app_volume} {app_muted}{rofi_info}{mute_icon}".strip())
+                print(f"{app_title} {volume_bar} {app_muted}{rofi_info}{mute_icon}".strip())
             
             sink_input = sink_input_match.group(1)
             app_name = ""
             app_volume = ""
+            app_volume_percent = ""
             app_muted = ""
             mute_icon = ""
             
         elif volume_re.match(line):
             volumes = line.split("/")
-            left_volume = f"Left: {volumes[1].strip()}"
-            right_volume = f"Right: {volumes[3].strip()}" if len(volumes) > 3 else ""
+            volume_percent_match = re.search(r"(\d+)%", volumes[1])
+            if volume_percent_match:
+                app_volume_percent = volume_percent_match.group(1)
+            
+            left_volume = f"{volumes[1].strip()}"
+            right_volume = f"{volumes[3].strip()}" if len(volumes) > 3 else ""
             app_volume = f"{left_volume} {right_volume}"
             
         elif mute_re.match(line):
@@ -207,12 +243,14 @@ def list_applications():
     if app_name and sink_input:
         rofi_info = f"\x00info\x1f{app_name}||{sink_input}"
         
+        volume_bar = create_volume_bar(app_volume_percent)
+        
         if len(app_name) < 40:
             app_title = app_name
         else:
             app_title = app_name[0:39] + "..."
             
-        print(f"{app_title} {app_volume} {app_muted}{rofi_info}{mute_icon}".strip())
+        print(f"{app_title} {volume_bar} {app_muted}{rofi_info}{mute_icon}".strip())
 
 def main():
     if dev_type == "app":
