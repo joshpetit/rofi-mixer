@@ -33,7 +33,7 @@ keep_selection = "\x00keep-selection\x1ftrue\n"
 enable_markup = "\x00markup-rows\x1ftrue\n"
 
 if dev_type == "app":
-    prompt = "\x00prompt\x1fSelect Application\n"
+    prompt = "\x00prompt\x1fApplications\n"
 else:
     prompt = f"\x00prompt\x1fSelect {'Speaker' if dev_type == 'sink' else 'Microphone'}\n"
 
@@ -58,9 +58,20 @@ def get_sink_input_from_app_name(app_name):
     return res.read().strip()
 
 if ROFI_RETV == 1:
-    if dev_type == "app":
+    ROFI_DATA = os.getenv("ROFI_DATA")
+    if ROFI_DATA:
+        desc = ROFI_INFO
+        device = os.popen(f'pactl list sinks| grep -C2 "Description: {desc}"|grep Name|cut -d: -f2|xargs').read().strip()
+        if ROFI_DATA:
+            app_name, sink_input = ROFI_DATA.split("||")
+            os.system(f'pactl move-sink-input {sink_input} "{device}"')
+        quit()
+    elif dev_type == "app":
         app_name, sink_input = ROFI_INFO.split("||")
-        # Nothing to do on selection for apps, just return to main view
+        print(f"\x00data\x1f{app_name}||{sink_input}")
+        print("\x00prompt\x1fSelect Output Sink for {}\n".format(app_name))
+        
+        dev_type = "sink"
     else:
         desc = ROFI_INFO
         device = get_device_from_desc(desc)
@@ -146,7 +157,7 @@ def list_sinks_sources():
     prefix = ""
     mute_icon = ""
     rofi_info = ""
-    
+
     description_re = re.compile(r"\s*Description: ")
     volume_re = re.compile(r"\s*Volume: ")
     mute_re = re.compile(r"\s*Mute: ")
@@ -197,11 +208,13 @@ def list_applications():
     app_muted = ""
     sink_input = ""
     mute_icon = ""
+    current_sink = ""
     
     sink_input_re = re.compile(r"Sink Input #(\d+)")
     volume_re = re.compile(r"\s*Volume: ")
     mute_re = re.compile(r"\s*Mute: ")
     app_name_re = re.compile(r'\s*application\.name = "(.*)"')
+    sink_re = re.compile(r"\s*Sink: (\d+)")
     
     for line in lines.splitlines():
         sink_input_match = sink_input_re.match(line)
@@ -215,8 +228,12 @@ def list_applications():
                     app_title = app_name
                 else:
                     app_title = app_name[0:39] + "..."
-                    
-                print(f"{app_title} {volume_bar} {app_muted}{rofi_info}{mute_icon}".strip())
+                
+                sink_display = ""
+                if current_sink:
+                    sink_display = build_app_sink_display(current_sink, sink_display)
+
+                print(f"{app_title}{sink_display} {volume_bar} {app_muted}{rofi_info}{mute_icon}".strip())
             
             sink_input = sink_input_match.group(1)
             app_name = ""
@@ -224,6 +241,7 @@ def list_applications():
             app_volume_percent = ""
             app_muted = ""
             mute_icon = ""
+            current_sink = ""
             
         elif volume_re.match(line):
             volumes = line.split("/")
@@ -234,7 +252,7 @@ def list_applications():
             left_volume = f"{volumes[1].strip()}"
             right_volume = f"{volumes[3].strip()}" if len(volumes) > 3 else ""
             app_volume = f"{left_volume} {right_volume}"
-            
+
         elif mute_re.match(line):
             muted = line.split("Mute: ")
             if muted[1] == "yes":
@@ -246,6 +264,9 @@ def list_applications():
                 
         elif app_name_re.match(line):
             app_name = app_name_re.match(line).group(1)
+            
+        elif sink_re.match(line):
+            current_sink = sink_re.match(line).group(1)
     
     if app_name and sink_input:
         rofi_info = f"\x00info\x1f{app_name}||{sink_input}"
@@ -256,8 +277,23 @@ def list_applications():
             app_title = app_name
         else:
             app_title = app_name[0:39] + "..."
-            
-        print(f"{app_title} {volume_bar} {app_muted}{rofi_info}{mute_icon}".strip())
+        
+        sink_display = ""
+        if current_sink:
+            sink_display = build_app_sink_display(current_sink, sink_display)
+
+        print(f"{app_title}{sink_display} {volume_bar} {app_muted}{rofi_info}{mute_icon}".strip())
+
+
+def build_app_sink_display(current_sink, sink_display):
+    res = os.popen(f"pactl list sinks | grep -A3 'Sink #{current_sink}' | grep -e 'Description' | cut -d: -f2")
+    sink_desc = res.read().strip()
+    if sink_desc:
+        sink_display = f" → {sink_desc}"
+        if len(sink_display) > 25:
+            sink_display = f" → {sink_desc[:22]}..."
+    return sink_display
+
 
 def main():
     if dev_type == "app":
