@@ -3,6 +3,7 @@ import os
 import re
 import argparse
 
+os.environ["LANG"] = "C"
 VOLUME_DELTA = 5
 res = os.getenv("ROFI_RETV")
 if res is not None:
