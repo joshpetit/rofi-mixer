@@ -8,5 +8,4 @@ rofi -theme-str 'window { width: 840; }' \
 -kb-custom-18 "minus,underscore" \
 -kb-custom-19 "equal,plus" \
 -show rofi-sink-mixer \
--modi "rofi-sink-mixer:$BASEDIR/rofi-mixer.py --type sink,rofi-sink-mixer:$BASEDIR/rofi-mixer.py --type app,rofi-source-mixer:$BASEDIR/rofi-mixer.py --type source" "$@"
-
+-modi "rofi-sink-mixer:$BASEDIR/rofi-mixer.py --type sink,rofi-app-mixer:$BASEDIR/rofi-mixer.py --type app,rofi-source-mixer:$BASEDIR/rofi-mixer.py --type source" "$@"
